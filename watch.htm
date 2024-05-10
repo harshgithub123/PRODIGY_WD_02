@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stopwatch</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    
+    .stopwatch {
+      margin: 50px auto;
+    }
+    
+    .display {
+      font-size: 2em;
+    }
+    
+    .controls {
+      margin-top: 20px;
+    }
+    
+    .controls button {
+      margin: 0 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    .laps {
+      margin-top: 20px;
+    }
+    
+    .laps ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    
+    .laps li {
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="stopwatch">
+    <div class="display">
+      <span id="minutes">00</span>:<span id="seconds">00</span>:<span id="milliseconds">00</span>
+    </div>
+    <div class="controls">
+      <button id="startStopButton" onclick="startStop()">Start</button>
+      <button id="resetButton" onclick="reset()">Reset</button>
+      <button id="lapButton" onclick="lap()">Lap</button>
+    </div>
+    <div class="laps">
+      <ul id="lapsList"></ul>
+    </div>
+  </div>
+
+  <script>
+    let timer;
+    let startTime;
+    let running = false;
+    let laps = [];
+
+    function startStop() {
+      if (running) {
+        clearInterval(timer);
+        document.getElementById("startStopButton").innerText = "Start";
+      } else {
+        startTime = Date.now() - laps.reduce((a, b) => a + b, 0);
+        timer = setInterval(updateTime, 10);
+        document.getElementById("startStopButton").innerText = "Stop";
+      }
+      running = !running;
+    }
+
+    function reset() {
+      clearInterval(timer);
+      running = false;
+      document.getElementById("startStopButton").innerText = "Start";
+      document.getElementById("minutes").innerText = "00";
+      document.getElementById("seconds").innerText = "00";
+      document.getElementById("milliseconds").innerText = "00";
+      document.getElementById("lapsList").innerHTML = "";
+      laps = [];
+    }
+
+    function updateTime() {
+      let currentTime = Date.now();
+      let elapsedTime = currentTime - startTime;
+
+      let minutes = Math.floor(elapsedTime / (1000 * 60));
+      let seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
+      let milliseconds = Math.floor((elapsedTime % 1000) / 10);
+
+      document.getElementById("minutes").innerText = padZero(minutes);
+      document.getElementById("seconds").innerText = padZero(seconds);
+      document.getElementById("milliseconds").innerText = padZero(milliseconds);
+    }
+
+    function lap() {
+      if (running) {
+        let lapTime = Date.now() - startTime;
+        laps.push(lapTime);
+        let lapItem = document.createElement("li");
+        lapItem.innerText = laps.length + ". " + formatTime(lapTime);
+        document.getElementById("lapsList").appendChild(lapItem);
+      }
+    }
+
+    function padZero(num) {
+      return (num < 10 ? "0" : "") + num;
+    }
+
+    function formatTime(milliseconds) {
+      let minutes = Math.floor(milliseconds / (1000 * 60));
+      let seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
+      let millis = Math.floor((milliseconds % 1000) / 10);
+      return padZero(minutes) + ":" + padZero(seconds) + ":" + padZero(millis);
+    }
+  </script>
+</body>
+</html>
